@@ -8,7 +8,7 @@ router.get('/users', async (req, res) =>{
     let db;
     try {
         db = await connect();
-        const query = 'SELECT * FROM usuarios';
+        const query = 'SELECT * FROM users';
         const [row] = await db.execute(query);
         console.log(row);
         res.json({
@@ -28,7 +28,7 @@ router.post('/users', async(req, res) => {
         db = await connect();
         const hashPassword = await bcrypt.hash(password, saltRound);
         console.log(hashPassword);
-        const query = `INSERT INTO usuarios(nombre, email, password) VALUES('${nombre}', '${email}', '${hashPassword}')`;
+        const query = `INSERT INTO users(nombre, email, password) VALUES('${nombre}', '${email}', '${hashPassword}')`;
         const [row] = await db.execute(query);
         console.log(row);
         res.json({
@@ -46,7 +46,7 @@ router.get('/users/:email', async (req, res) => {
     try {
         db = await connect();
         console.log(email);
-        const query = 'SELECT * FROM usuarios WHERE email = ?';
+        const query = 'SELECT * FROM users WHERE email = ?';
         const [row] = await db.execute(query, [email]);
         console.log(row);
         res.json({
@@ -64,7 +64,7 @@ router.delete('/users/:email', authVerify, async (req, res) => {
     let db;
     try {
         db = await connect();
-        const query = 'DELETE FROM usuarios WHERE email = ?';
+        const query = 'DELETE FROM users WHERE email = ?';
         const [rows] = await db.execute(query, [email]);
         if(rows.affectedRows === 0) {
             res.json({
@@ -89,7 +89,7 @@ router.put('/users/:email', async (req, res) => {
 
     try {
         db = await connect();
-        const query = 'UPDATE usuarios SET nombre = ? WHERE email = ?';
+        const query = 'UPDATE users SET nombre = ? WHERE email = ?';
         const [rows] = await db.execute(query, [nombre, email]);
         if(rows.affectedRows === 0) {
             res.json({
