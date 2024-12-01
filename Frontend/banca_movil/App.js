@@ -1,7 +1,9 @@
-import React from 'react';
-import AppNavigator from './src/navigation/AppNavigator.js';
+import React from "react"; 
+import Navigation from "./Navigation"
+
 
 export default function App() {
-    return <AppNavigator />;
+  return (
+    <Navigation/>
+  );
 }
-
