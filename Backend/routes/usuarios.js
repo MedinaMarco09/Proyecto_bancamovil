@@ -4,6 +4,11 @@ const bcrypt = require('bcrypt');
 const router = Router();
 const authVerify = require('../middleware/authVerify');
 
+router.get("/", (req, res) => {
+    res.json("Bienvenido a la banca movil");
+});
+
+// Obtener todos los usuarios
 router.get('/users', async (req, res) =>{
     let db;
     try {
@@ -19,6 +24,49 @@ router.get('/users', async (req, res) =>{
         console.log(err);
     }
 });
+
+/* Crear un nuevo usuario
+router.post('/users', async (req, res) => {
+    const { email, nombre, password } = req.body;
+    console.log(req.body);
+    if (!email || !nombre || !password) {
+        return res.status(400).json({ status: 400, message: 'Todos los campos son obligatorios' });
+    }
+
+    let db;
+    try {
+        const saltRounds = 10;
+        db = await connect();
+        const hashPassword = await bcrypt.hash(password, saltRounds);
+        const query = 'INSERT INTO users(nombre, email, password) VALUES(?, ?, ?)';
+        const [result] = await db.execute(query, [nombre, email, hashPassword]);
+
+        res.json({
+            status: 200,
+            message: 'Usuario creado exitosamente',
+            userId: result.insertId,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ status: 500, message: 'Error interno del servidor' });
+    }
+});
+*/
+// router.get('/users', async (req, res) =>{
+//     let db;
+//     try {
+//         db = await connect();
+//         const query = 'SELECT * FROM users';
+//         const [row] = await db.execute(query);
+//         console.log(row);
+//         res.json({
+//             'status': 200,
+//             'users': row
+//         });
+//     } catch(err) {
+//         console.log(err);
+//     }
+// });
 
 router.post('/users', async(req, res) => {
     let db;

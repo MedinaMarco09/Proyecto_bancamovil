@@ -16,12 +16,12 @@ router.post('/auth/login', async (req, res) => {
         }
         db = await connect();// Espera los datos para conectar
         
-        const query = `SELECT * FROM usuarios WHERE email = "${email}"`; // guarda en una variable
+        const query = `SELECT * FROM users WHERE email = "${email}"`; // guarda en una variable
         const [row] = await db.execute(query);//Pide regresar los datos en un array
         
         if(row.length === 1 ) {//Si hay un array lo sigue
             const hashPassword = row[0].password;//obtiene los datos del hash puesto en la base de datos
-            if(await bcrypt.compare(password, hashPassword)) {//compara las contraseñas
+            if(await bcrypt.compare(password, hashPassword)) {//Compara la contraseña enviada por el usuario (password) con la contraseña encriptada (hashPassword).
                 const token = jwt.sign({email: email}, 'secret', {//Si todo sale bien se genera un toke de una hora
                     expiresIn: '1h'
                 });

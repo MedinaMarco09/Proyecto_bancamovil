@@ -7,9 +7,9 @@ const auth = require('./routes/auth');
 
 const PORT = 3000;
 
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
-
+app.use(express.json());
 app.use(users);
 app.use(auth);
 

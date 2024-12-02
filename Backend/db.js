@@ -2,7 +2,7 @@ const mysql = require('mysql2/promise');
 //Funcion de conectarse a la base de datos
 async function connect() {
     try {
-        const HOST = 'Localhost';
+        const HOST = 'localhost';
         const PORT = 3306;
         const USER = 'root';
         const PASSWORD = 'Yacko';
