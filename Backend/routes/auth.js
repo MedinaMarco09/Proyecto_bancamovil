@@ -3,6 +3,7 @@ const connect = require('../db');
 const bcrypt = require('bcrypt');
 const router = Router();
 const jwt = require('jsonwebtoken');
+const authVerify = require('../middleware/authVerify');
 
 router.post('/auth/login', async (req, res) => {
     let db;
@@ -39,6 +40,29 @@ router.post('/auth/login', async (req, res) => {
         }
     } catch(err) {//Sino aparecera error
         console.log(err);
+    }
+});
+
+router.get('/user', authVerify, async (req, res) => {
+    const email = req.email_usuario; // Este valor se obtiene del middleware authVerify
+
+    let db;
+    try {
+        db = await connect();
+        const query = 'SELECT nombre, email, saldo FROM users WHERE email = ?';
+        const [row] = await db.execute(query, [email]);
+
+        if (row.length > 0) {
+            res.json({
+                status: 200,
+                user: row[0], // Retornamos los datos del usuario
+            });
+        } else {
+            res.status(404).json({ status: 404, message: 'Usuario no encontrado' });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ status: 500, message: 'Error en el servidor' });
     }
 });
 

@@ -1,12 +1,16 @@
 const mysql = require('mysql2/promise');
+const dotenv = require('dotenv');
+dotenv.config({ path: './env'});
+
+
 //Funcion de conectarse a la base de datos
 async function connect() {
     try {
-        const HOST = 'localhost';
-        const PORT = 3306;
-        const USER = 'root';
-        const PASSWORD = 'Yacko';
-        const DATABASE = 'banca_movil';
+        const HOST = process.env.DB_HOST;
+        const PORT = process.env.DB_PORT;
+        const USER = process.env.DB_USER;
+        const PASSWORD = process.env.DB_PASSWORD;
+        const DATABASE = process.env.DB_NAME;
 
         const conn = await mysql.createConnection({
             'host': HOST,
