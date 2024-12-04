@@ -1,111 +1,79 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
+import React, { useState } from "react";
+import { TextInput, Button, Text, View, StyleSheet, Alert } from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://10.0.2.2:3000';
 
-export default function LoginScreen() {
-  const [showForm, setShowForm] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function LoginScreen({ navigation }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Por favor, completa todos los campos.');
-      return;
-    }
+    const handleLogin = async () => {
+        try {
+            const response = await axios.post(`${BASE_URL}/auth/login`, { email, password });
+            const { token } = response.data;
 
-    try {
-      const response = await fetch(`${BASE_URL}/users/${email}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (data.status === 200 && data.users.length > 0) {
-        const user = data.users[0];
-        const passwordMatch = await bcrypt.compare(password, user.password);
-
-        if (passwordMatch) {
-          Alert.alert('Éxito', `Bienvenido, ${user.nombre}!`);
-        } else {
-          Alert.alert('Error', 'Contraseña incorrecta.');
+            if (token) {
+                await AsyncStorage.setItem('token', token);
+                navigation.navigate('Dashboard'); // Navegar al Dashboard
+            } else {
+                setError('Credenciales incorrectas');
+            }
+        } catch (err) {
+            console.error(err);
+            Alert.alert('Error', 'Ocurrió un error. Por favor, intenta de nuevo.');
         }
-      } else {
-        Alert.alert('Error', 'Usuario no encontrado.');
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Ocurrió un problema al iniciar sesión.');
-    }
-  };
+    };
 
-  return (
-<View style={styles.container}>
-      {!showForm ? (
-        <>
-          <Text style={styles.text}>Bienvenido a la pantalla de Login</Text>
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Iniciar sesión"
-              color="#0E6A7F"
-              onPress={() => setShowForm(true)} 
+    return (
+        <View style={styles.container}>
+            <Text style={styles.text}>Inicia sesión</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Correo"
+                value={email}
+                onChangeText={setEmail}
             />
-          </View>  
-        </>
-      ) : (
-        <View style={styles.formContainer}>
-          <Text style={styles.text}>Formulario de Inicio de Sesión</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Usuario"
-            placeholderTextColor="#aaa"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Contraseña"
-            secureTextEntry
-            placeholderTextColor="#aaa"
-          />
-          <Button
-            title="Enviar"
-            color="#000"
-            onPress={() => alert('Inicio de sesión enviado')}
-          />
-          <Button
-            title="Cancelar"
-            color="red"
-            onPress={() => setShowForm(false)}
-          />
+            <TextInput
+                style={styles.input}
+                placeholder="Contraseña"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+            />
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <Button title="Iniciar sesión" onPress={handleLogin} color="#0E6A7F" />
         </View>
-      )}
-    </View>
-  );
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'top',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 20,
-    paddingTop: 64,
-    paddingBottom: 80,
-  },
-  buttonContainer:{
-    paddingTop: 100,
-  },
-  input: {
-    padding:14,
-    margin: 2,
-    backgroundColor: "#1238",
-    borderRadius: 12,
-  }
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        padding: 20,
+        backgroundColor: '#fff',
+    },
+    text: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
+    input: {
+        padding: 10,
+        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+    },
+    error: {
+        color: 'red',
+        marginBottom: 10,
+    },
 });
+
 
 // border-radius: 40px;
 // border: 1px solid rgba(119, 129, 233, 0.00);
