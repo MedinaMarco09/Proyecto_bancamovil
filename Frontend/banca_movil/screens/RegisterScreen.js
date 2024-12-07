@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Image, TouchableOpacity } from 'react-native';
 
 const BASE_URL = 'http://10.0.2.2:3000';
 
@@ -46,7 +46,11 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Registro de Usuario</Text>
+      <Image
+        source={require('../src/images/Logo.png')}
+        style={styles.logo}
+      />
+      <Text style={styles.title}>Mobile Banking</Text>
       <TextInput
         style={styles.input}
         placeholder="Nombre"
@@ -78,9 +82,11 @@ export default function RegisterScreen() {
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
-      <View style={styles.buttonContainer}>
-        <Button title="Registrar" color="#0E6A7F" onPress={handleRegister} />
-      </View>
+      <TouchableOpacity
+          style={styles.button}
+          onPress={handleRegister}>
+          <Text style={styles.buttonText}>Log in</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -88,27 +94,59 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    padding: 20,
+    padding: 10,
+    paddingLeft:70,
+    paddingRight:70,
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
     width: '100%',
-    padding: 10,
-    marginBottom: 15,
-    borderWidth: 1,
+    marginBottom: 5,
     borderColor: '#ccc',
     borderRadius: 5,
-    backgroundColor: '#f9f9f9',
+    marginLeft: 50,
+    marginRight: 60,
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    borderRadius: 5,
   },
   buttonContainer: {
-    marginTop: 10,
+    marginTop: 90,
     width: '100%',
   },
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 50,
+    marginBottom: 30,
+},
+logo: {
+    width: 108,
+    height: 70,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginTop: 70,
+},
+button: {
+  backgroundColor: '#0E6A7F',
+  padding: 14,
+  borderRadius: 20,
+  alignItems: 'center',
+  marginTop: 45,
+  elevation: 10,
+  paddingHorizontal:100,
+},
+buttonText: {
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: 'normal',
+  
+},
 });

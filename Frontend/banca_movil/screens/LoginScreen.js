@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { TextInput, Button, Text, View, StyleSheet, Alert } from "react-native";
+import { TextInput, Button, Text, View, StyleSheet, Alert, Image, TouchableOpacity } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const BASE_URL = 'http://10.0.2.2:3000';
 
@@ -29,42 +30,84 @@ export default function LoginScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>Inicia sesión</Text>
+            <Image
+                source={require('../src/images/Logo.png')}
+                style={styles.logo}
+            />
+            <Text style={styles.text}>Mobile Banking</Text>
+            <Text style={styles.text2}>Welcome to Mobile Banking</Text>   
             <TextInput
                 style={styles.input}
-                placeholder="Correo"
+                placeholder="E-mail"
                 value={email}
                 onChangeText={setEmail}
             />
             <TextInput
                 style={styles.input}
-                placeholder="Contraseña"
+                placeholder="Password"
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
             />
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            <Button title="Iniciar sesión" onPress={handleLogin} color="#0E6A7F" />
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleLogin}>
+                    <Text style={styles.buttonText}>Log in</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.buttonRegister, styles.registerButton, { flexDirection: 'row', alignItems: 'center' }]} // Alineación horizontal
+                    onPress={() => navigation.navigate('Register')}>
+                    <Text>Don't have an account? </Text>
+                    <Text style={styles.buttonText2}>Sing Up</Text>
+                </TouchableOpacity>
         </View>
     );
+    
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        padding: 20,
         backgroundColor: '#fff',
+        justifyContent: 'flex-start',
+        paddingHorizontal: 20,
+    },
+    logoContainer: {
+        alignItems: 'center',
+        marginTop: 50,
+        marginBottom: 30,
+    },
+    logo: {
+        width: 108,
+        height: 70,
+        resizeMode: 'contain',
+        alignSelf: 'center',
+        marginTop: 70,
+    },
+    content: {
+        flex: 1,
+        justifyContent: 'center',
     },
     text: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 20,
+        textAlign: 'center',
+    },
+    text2: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        textAlign: 'center',
     },
     input: {
         padding: 10,
+        marginLeft: 50,
+        marginRight: 60,
         marginBottom: 15,
-        borderWidth: 1,
+        borderWidth: 0,
+        borderBottomWidth: 1,
         borderColor: '#ccc',
         borderRadius: 5,
     },
@@ -72,6 +115,31 @@ const styles = StyleSheet.create({
         color: 'red',
         marginBottom: 10,
     },
+    button: {
+        backgroundColor: '#0E6A7F',
+        padding: 14,
+        borderRadius: 20,
+        alignItems: 'center',
+        margin: 40,
+        elevation: 10,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'normal',
+    },
+    buttonText2: {
+        color: '#07f',
+        fontSize: 16,
+        fontWeight:'normal',
+        textDecorationLine: 'underline',
+    },
+    registerButton:{
+        backgroundColor: '223',
+        flexDirection: 'row', 
+        alignItems: 'start',
+        marginLeft: 50,
+    }
 });
 
 

@@ -26,7 +26,7 @@ function MyTabs() {
     return (
         <Tab.Navigator>
             <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Auth" component={AuthStack} options={{ headerShown: false }} />
+            <Tab.Screen name="Login" component={AuthStack} options={{ headerShown: false }} />
             <Tab.Screen name="Register" component={RegisterScreen} />
         </Tab.Navigator>
     );
