@@ -17,7 +17,7 @@ export default function HomeScreen() {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, styles.loginButton]}
-          onPress={() => navigation.navigate('Login')} // Navegar a Login
+          onPress={() => navigation.navigate('Auth', { screen: 'Login' })} // Navegar a Login
         >
           <Text style={styles.buttonText}>Log In</Text>
         </TouchableOpacity>
@@ -38,48 +38,47 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    backgroundColor: '#fff',
   },
   logo: {
-    width: 360,
-    height: 130,
+    width: 108,
+    height: 70,
     resizeMode: 'contain',
-    marginBottom: 35,
+    marginBottom: 20,
   },
   text: {
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
+    textAlign: 'center',
   },
   text2: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 30,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     width: '80%',
     marginTop: 20,
   },
   button: {
-    flex: 1,
-    padding: 12,
-    marginHorizontal: 5,
-    borderRadius: 10,
+    backgroundColor: '#0E6A7F',
+    padding: 14,
+    borderRadius: 20,
     alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 10,
+    elevation: 10,
   },
   loginButton: {
     backgroundColor: '#0E6A7F',
   },
   registerButton: {
-    backgroundColor: '#ddd',
+    backgroundColor: '#07f',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'normal',
   },
 });
-
