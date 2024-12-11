@@ -66,4 +66,51 @@ router.get('/user', authVerify, async (req, res) => {
     }
 });
 
+router.post('/movimientos', async (req, res) => {
+    const { usuario_id, tipo_movimiento, cantidad } = req.body;
+    const db = await connect();
+
+    try {
+        const query = tipo_movimiento === 'DEPOSITO' 
+            ? 'UPDATE users SET saldo = saldo + ? WHERE id = ?'
+            : 'UPDATE users SET saldo = saldo - ? WHERE id = ?';
+
+        await db.execute(query, [cantidad, usuario_id]);
+        await db.execute(
+            'INSERT INTO movimientos (usuario_id, tipo_movimiento, cantidad) VALUES (?, ?, ?)',
+            [usuario_id, tipo_movimiento, cantidad]
+        );
+
+        res.json({ status: 200, message: 'Movimiento registrado con éxito' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ status: 500, message: 'Error en el servidor' });
+    }
+});
+
+router.post('/transferencias', async (req, res) => {
+    const { remitente_id, destinatario_id, monto, descripcion } = req.body;
+    const db = await connect();
+
+    try {
+        const [rows] = await db.execute('SELECT saldo FROM users WHERE id = ?', [remitente_id]);
+        if (rows.length === 0 || rows[0].saldo < monto) {
+            return res.status(400).json({ status: 400, message: 'Saldo insuficiente o remitente no encontrado' });
+        }
+
+        await db.execute('UPDATE users SET saldo = saldo - ? WHERE id = ?', [monto, remitente_id]);
+        await db.execute('UPDATE users SET saldo = saldo + ? WHERE id = ?', [monto, destinatario_id]);
+        await db.execute(
+            'INSERT INTO transferencias (remitente_id, destinatario_id, monto, descripcion) VALUES (?, ?, ?, ?)',
+            [remitente_id, destinatario_id, monto, descripcion]
+        );
+
+        res.json({ status: 200, message: 'Transferencia realizada con éxito' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ status: 500, message: 'Error en el servidor' });
+    }
+});
+
+
 module.exports = router;
