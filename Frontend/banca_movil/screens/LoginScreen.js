@@ -17,7 +17,7 @@ export default function LoginScreen({ navigation }) {
 
             if (token) {
                 await AsyncStorage.setItem('token', token);
-                navigation.navigate('Dashboard'); // Navegar al Dashboard
+                navigation.navigate('Dashboard'); 
             } else {
                 setError('Credenciales incorrectas');
             }

@@ -15,7 +15,7 @@ export default function MakeTransferScreen({ navigation }) {
         obtenerDatosUsuario();
     }, []);
 
-    // 1. Verificar que el usuario esté autenticado
+   
     const obtenerDatosUsuario = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -35,7 +35,7 @@ export default function MakeTransferScreen({ navigation }) {
         }
     };
 
-    // 2. Mejorar la función de generar QR
+
     const generarRetiroQR = async () => {
         try {
             // Validaciones básicas
@@ -81,7 +81,7 @@ export default function MakeTransferScreen({ navigation }) {
                 }
             );
 
-            // Verificar respuesta
+  
             if (response.data.status === 200) {
                 const qrData = JSON.stringify({
                     monto: montoNumerico,
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     },
     content: {
         padding: 20,
-        paddingBottom: 40, // Espacio extra al final para scroll
+        paddingBottom: 40, 
     },
     title: {
         fontSize: 24,

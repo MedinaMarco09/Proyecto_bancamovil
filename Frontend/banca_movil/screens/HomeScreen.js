@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
-  const navigation = useNavigation(); // Hook para acceder a la navegación
+  const navigation = useNavigation(); 
 
   return (
     <View style={styles.container}>
@@ -17,14 +17,14 @@ export default function HomeScreen() {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, styles.loginButton]}
-          onPress={() => navigation.navigate('Auth', { screen: 'Login' })} // Navegar a Login
+          onPress={() => navigation.navigate('Auth', { screen: 'Login' })} 
         >
           <Text style={styles.buttonText}>Log In</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.registerButton]}
-          onPress={() => navigation.navigate('Register')} // Navegar a Register
+          onPress={() => navigation.navigate('Register')} 
         >
           <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
