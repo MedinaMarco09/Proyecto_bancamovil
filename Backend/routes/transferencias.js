@@ -5,24 +5,51 @@ const QRCode = require('qrcode');
 const router = Router();
 
 router.post('/transferencias', authVerify, async (req, res) => {
-    const { remitente_id, destinatario_id, monto, descripcion } = req.body;
-    const db = await connect();
+    const { destinatario_id, monto } = req.body;
+    const remitente_email = req.email_usuario;
+    let db;
 
     try {
-        const [rows] = await db.execute('SELECT saldo FROM users WHERE id = ?', [remitente_id]);
-        if (rows.length === 0 || rows[0].saldo < monto) {
-            return res.status(400).json({ status: 400, message: 'Saldo insuficiente o remitente no encontrado' });
-        }
+        db = await connect();
+        await db.beginTransaction(); // Iniciar transacción
 
-        await db.execute('UPDATE users SET saldo = saldo - ? WHERE id = ?', [monto, remitente_id]);
-        await db.execute('UPDATE users SET saldo = saldo + ? WHERE id = ?', [monto, destinatario_id]);
-        await db.execute(
-            'INSERT INTO transferencias (remitente_id, destinatario_id, monto, descripcion) VALUES (?, ?, ?, ?)',
-            [remitente_id, destinatario_id, monto, descripcion.substring(0, 50)] 
+        // Obtener saldo del remitente
+        const [remitente] = await db.execute(
+            'SELECT id, saldo FROM users WHERE email = ?',
+            [remitente_email]
         );
 
-        res.json({ status: 200, message: 'Transferencia realizada con éxito' });
+        if (remitente[0].saldo < monto) {
+            await db.rollback();
+            return res.status(400).json({
+                status: 400,
+                message: 'Saldo insuficiente'
+            });
+        }
+
+        // Actualizar saldo del remitente
+        await db.execute(
+            'UPDATE users SET saldo = saldo - ? WHERE email = ?',
+            [monto, remitente_email]
+        );
+
+        // Actualizar saldo del destinatario
+        await db.execute(
+            'UPDATE users SET saldo = saldo + ? WHERE id = ?',
+            [monto, destinatario_id]
+        );
+
+        // Registrar la transferencia
+        await db.execute(
+            'INSERT INTO transferencias (remitente_id, destinatario_id, monto) VALUES (?, ?, ?)',
+            [remitente[0].id, destinatario_id, monto]
+        );
+
+        await db.commit(); // Confirmar transacción
+        res.json({ status: 200, message: 'Transferencia exitosa' });
+
     } catch (err) {
+        if (db) await db.rollback();
         console.error(err);
         res.status(500).json({ status: 500, message: 'Error en el servidor' });
     }
@@ -43,6 +70,29 @@ router.get('/api/generate-qr', authVerify, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error al generar el código QR' });
+    }
+});
+
+// En el backend (transferencias.js)
+router.post('/transferencias/generate-qr', authVerify, async (req, res) => {
+    try {
+        const { monto, descripcion, userId } = req.body;
+        
+        // Verificar datos recibidos
+        console.log('Datos recibidos:', { monto, descripcion, userId });
+        
+        // Generar y enviar respuesta
+        res.json({
+            status: 200,
+            qrCode: true,
+            message: 'QR generado exitosamente'
+        });
+    } catch (error) {
+        console.error('Error en generate-qr:', error);
+        res.status(500).json({
+            status: 500,
+            message: 'Error al generar QR'
+        });
     }
 });
 
