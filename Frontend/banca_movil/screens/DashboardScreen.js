@@ -4,7 +4,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import QRCode from 'react-native-qrcode-svg';
 
-const BASE_URL = 'http://192.168.1.159:3000';
+const BASE_URL = 'http://172.17.182.42:3000';
 
 export default function DashboardScreen({ navigation }) {
     const [user, setUser] = useState(null);
@@ -28,22 +28,6 @@ export default function DashboardScreen({ navigation }) {
 
         fetchUserData();
     }, []);
-
-    const registrarMovimiento = async (tipoMovimiento, cantidad) => {
-        const token = await AsyncStorage.getItem('token');
-        try {
-            const response = await axios.post(
-                `${BASE_URL}/movimientos`,
-                { usuario_id: user.id, tipo_movimiento: tipoMovimiento, cantidad },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            Alert.alert('Éxito', response.data.message);
-            setUser({ ...user, saldo: user.saldo + (tipoMovimiento === 'DEPOSITO' ? cantidad : -cantidad) });
-        } catch (err) {
-            console.error(err);
-            Alert.alert('Error', 'No se pudo registrar el movimiento');
-        }
-    };
 
     const generarQr = async () => {
         const token = await AsyncStorage.getItem("token");

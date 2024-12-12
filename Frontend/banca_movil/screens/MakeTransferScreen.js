@@ -1,94 +1,183 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { ScrollView, View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import QRCode from 'react-native-qrcode-svg';
 
-const BASE_URL = 'http://192.168.1.159:3000';
+const BASE_URL = 'http://172.17.182.42:3000';
 
 export default function MakeTransferScreen({ navigation }) {
-    const [destinatarioId, setDestinatarioId] = useState('');
     const [monto, setMonto] = useState('');
-    const [descripcion, setDescripcion] = useState('');
+    const [qrCode, setQrCode] = useState('');
+    const [user, setUser] = useState(null);
 
-    const handleTransfer = async () => {
-        if (!destinatarioId || !monto || !descripcion) {
-            Alert.alert("Error", "Por favor completa todos los campos.");
-            return;
-        }
+    useEffect(() => {
+        obtenerDatosUsuario();
+    }, []);
 
+    // 1. Verificar que el usuario esté autenticado
+    const obtenerDatosUsuario = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                Alert.alert("Error", "No hay sesión activa");
+                navigation.navigate('Login');
+                return;
+            }
+
+            const response = await axios.get(`${BASE_URL}/user`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUser(response.data.user);
+        } catch (error) {
+            console.log('Error en obtenerDatosUsuario:', error);
+            Alert.alert("Error", "No se pudieron obtener los datos del usuario");
+        }
+    };
+
+    // 2. Mejorar la función de generar QR
+    const generarRetiroQR = async () => {
+        try {
+            // Validaciones básicas
+            if (!monto || isNaN(parseFloat(monto))) {
+                Alert.alert('Error', 'Por favor, ingrese un monto válido.');
+                return;
+            }
+
+            const montoNumerico = parseFloat(monto);
+            if (montoNumerico <= 0) {
+                Alert.alert('Error', 'El monto debe ser mayor a 0.');
+                return;
+            }
+
+            if (!user) {
+                Alert.alert('Error', 'Datos de usuario no disponibles');
+                return;
+            }
+
+            if (user.saldo < montoNumerico) {
+                Alert.alert('Error', 'Saldo insuficiente');
+                return;
+            }
+
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                Alert.alert('Error', 'No hay sesión activa');
+                return;
+            }
+
+            // Hacer la petición al servidor
             const response = await axios.post(
-                `${BASE_URL}/transferencias`,
+                `${BASE_URL}/transferencias/generate-qr`,
                 {
-                    remitente_id: user.id,
-                    destinatario_id: destinatarioId,
-                    monto: parseFloat(monto),
-                    descripcion,
+                    monto: montoNumerico,
+                    descripcion: 'Retiro QR'
                 },
                 {
-                    headers: { Authorization: `Bearer ${token}` },
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
             );
 
+            // Verificar respuesta
             if (response.data.status === 200) {
-                Alert.alert("Éxito", "Transferencia realizada con éxito.");
-                navigation.navigate("TransactionHistory");
+                const qrData = JSON.stringify({
+                    monto: montoNumerico,
+                    fromUserId: user.id,
+                    timestamp: Date.now()
+                });
+
+                setQrCode(qrData);
+                setUser(prevUser => ({
+                    ...prevUser,
+                    saldo: prevUser.saldo - montoNumerico
+                }));
+
+                Alert.alert('Éxito', `Se generó el QR y se descontaron $${monto} de su saldo`);
+                setMonto('');
             } else {
-                Alert.alert("Error", response.data.message || "Error en la transferencia.");
+                throw new Error('Respuesta inválida del servidor');
             }
         } catch (error) {
-            Alert.alert("Error", "Error de conexión al realizar la transferencia.");
+            console.log('Error en generarRetiroQR:', error);
+            Alert.alert(
+                'Error', 
+                error.response?.data?.message || 
+                'No se pudo generar el QR. Verifique su conexión e intente nuevamente.'
+            );
         }
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Hacer Transferencia</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="ID del destinatario"
-                value={destinatarioId}
-                onChangeText={setDestinatarioId}
-                keyboardType="numeric"
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Monto"
-                value={monto}
-                onChangeText={setMonto}
-                keyboardType="numeric"
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Descripción"
-                value={descripcion}
-                onChangeText={setDescripcion}
-            />
-            <Button title="Transferir" onPress={handleTransfer} />
-        </View>
+        <ScrollView style={styles.container}>
+            <View style={styles.content}>
+                <Text style={styles.title}>Generar Código QR para Retiro</Text>
+                <Text style={styles.saldo}>Saldo disponible: ${user?.saldo || 0}</Text>
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Monto a retirar"
+                    keyboardType="numeric"
+                    value={monto}
+                    onChangeText={setMonto}
+                />
+
+                <View style={styles.buttonContainer}>
+                    <Button 
+                        title="Generar QR" 
+                        onPress={generarRetiroQR} 
+                        color="#6A0DAD" 
+                    />
+                </View>
+
+                {qrCode && (
+                    <View style={styles.qrContainer}>
+                        <QRCode
+                            value={qrCode}
+                            size={250}
+                        />
+                    </View>
+                )}
+            </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
         backgroundColor: '#fff',
+    },
+    content: {
+        padding: 20,
+        paddingBottom: 40, // Espacio extra al final para scroll
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
+        textAlign: 'center',
+    },
+    saldo: {
+        fontSize: 18,
+        marginBottom: 20,
+        textAlign: 'center',
     },
     input: {
-        width: '100%',
-        padding: 10,
-        marginBottom: 10,
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: '#ddd',
+        padding: 10,
+        marginBottom: 15,
         borderRadius: 5,
     },
+    buttonContainer: {
+        marginVertical: 10,
+    },
+    qrContainer: {
+        alignItems: 'center',
+        marginTop: 30,
+    }
 });
+

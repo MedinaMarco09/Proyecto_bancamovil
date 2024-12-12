@@ -4,7 +4,7 @@ import { View, Text, FlatList, StyleSheet } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'http://192.168.1.159:3000';
+const BASE_URL = 'http://172.17.182.42:3000';
 
 const TransactionHistoryScreen = () => {
   const [transactions, setTransactions] = useState([]);

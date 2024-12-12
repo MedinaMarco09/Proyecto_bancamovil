@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, Image, TouchableOpacity } from 'react-native';
 
-const BASE_URL = 'http://192.168.1.159:3000';
+const BASE_URL = 'http://172.17.182.42:3000';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
