@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config({ path: './env'});
 
 
-//Funcion de conectarse a la base de datos
+
 async function connect() {
     try {
         const HOST = process.env.DB_HOST;

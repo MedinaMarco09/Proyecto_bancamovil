@@ -9,21 +9,20 @@ router.post('/auth/login', async (req, res) => {
     let db;
     try {
         const {email, password} = req.body;
-        if (!email || !password) {//Ingreso de datos del usuario
+        if (!email || !password) {
             return res.status(400).json({
                 status: 400,
                 message: 'Email y contraseña son obligatorios'
             });
         }
-        db = await connect();// Espera los datos para conectar
+        db = await connect();
         
-        const query = `SELECT * FROM users WHERE email = "${email}"`; // guarda en una variable
-        const [row] = await db.execute(query);//Pide regresar los datos en un array
-        
-        if(row.length === 1 ) {//Si hay un array lo sigue
-            const hashPassword = row[0].password;//obtiene los datos del hash puesto en la base de datos
-            if(await bcrypt.compare(password, hashPassword)) {//Compara la contraseña enviada por el usuario (password) con la contraseña encriptada (hashPassword).
-                const token = jwt.sign({email: email}, 'secret', {//Si todo sale bien se genera un toke de una hora
+        const query = `SELECT * FROM users WHERE email = "${email}"`; 
+        const [row] = await db.execute(query);
+        if(row.length === 1 ) {
+            const hashPassword = row[0].password;
+            if(await bcrypt.compare(password, hashPassword)) {
+                const token = jwt.sign({email: email}, 'secret', {
                     expiresIn: '1h'
                 });
                 res.json({
@@ -33,18 +32,18 @@ router.post('/auth/login', async (req, res) => {
             } else {
                 res.json({
                     'status': 400,
-                    message: 'Contraseña incorrecta',//salta un mensaje con la contraseña incorrecta.
+                    message: 'Contraseña incorrecta',
                     'token': null
                 });
             }
         }
-    } catch(err) {//Sino aparecera error
+    } catch(err) {
         console.log(err);
     }
 });
 
 router.get('/user', authVerify, async (req, res) => {
-    const email = req.email_usuario; // Este valor se obtiene del middleware authVerify
+    const email = req.email_usuario; 
 
     let db;
     try {
@@ -55,7 +54,7 @@ router.get('/user', authVerify, async (req, res) => {
         if (row.length > 0) {
             res.json({
                 status: 200,
-                user: row[0], // Retornamos los datos del usuario
+                user: row[0], 
             });
         } else {
             res.status(404).json({ status: 404, message: 'Usuario no encontrado' });
@@ -89,21 +88,23 @@ router.post('/movimientos', async (req, res) => {
 });
 
 router.post('/transferencias', async (req, res) => {
-    const { remitente_id, destinatario_id, monto, descripcion } = req.body;
+    const { remitente_id, destinatario_id, monto } = req.body;
     const db = await connect();
-
+    console.log(remitente_id);
     try {
+        
         const [rows] = await db.execute('SELECT saldo FROM users WHERE id = ?', [remitente_id]);
-        if (rows.length === 0 || rows[0].saldo < monto) {
+        console.log(rows.length === 0, parseFloat(rows[0].saldo) < parseFloat(monto));
+        if (rows.length === 0 || parseFloat(rows[0].saldo) < parseFloat(monto)) {
             return res.status(400).json({ status: 400, message: 'Saldo insuficiente o remitente no encontrado' });
         }
 
         await db.execute('UPDATE users SET saldo = saldo - ? WHERE id = ?', [monto, remitente_id]);
         await db.execute('UPDATE users SET saldo = saldo + ? WHERE id = ?', [monto, destinatario_id]);
-        await db.execute(
-            'INSERT INTO transferencias (remitente_id, destinatario_id, monto, descripcion) VALUES (?, ?, ?, ?)',
-            [remitente_id, destinatario_id, monto, descripcion]
-        );
+        // await db.execute(
+        //     'INSERT INTO transferencias (remitente_id, destinatario_id, monto, descripcion) VALUES (?, ?, ?, ?)',
+        //     [remitente_id, destinatario_id, monto, "s"]
+        // );
 
         res.json({ status: 200, message: 'Transferencia realizada con éxito' });
     } catch (err) {

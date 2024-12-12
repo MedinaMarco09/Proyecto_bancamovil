@@ -1,32 +1,31 @@
 const { Router } = require('express');
 const connect = require('../db');
 const bcrypt = require('bcrypt');
-const cors = require('cors'); // Importar cors
+const cors = require('cors'); 
 const router = Router();
 const authVerify = require('../middleware/authVerify');
 
-router.use(cors()); // Habilitar CORS para todas las rutas en este router
-
+router.use(cors());
 router.get("/", (req, res) => {
     res.json("Bienvenido a la banca movil");
 });
 
 // Obtener todos los usuarios
-router.get('/users', async (req, res) => {
-    let db = null;
-    try {
-        db = await connect();
-        const query = 'SELECT * FROM users';
-        const [row] = await db.execute(query);
-        console.log(row);
-        res.json({
-            'status': 200,
-            'users': row
-        });
-    } catch (err) {
-        console.log(err);
-    }
-});
+// router.get('/users', async (req, res) => {
+//     let db = null;
+//     try {
+//         db = await connect();
+//         const query = 'SELECT * FROM users';
+//         const [row] = await db.execute(query);
+//         console.log(row);
+//         res.json({
+//             'status': 200,
+//             'users': row
+//         });
+//     } catch (err) {
+//         console.log(err);
+//     }
+// });
 
 router.post('/register', async (req, res) => {
     let db;

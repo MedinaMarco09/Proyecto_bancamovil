@@ -11,9 +11,9 @@ router.post('/transferencias', authVerify, async (req, res) => {
 
     try {
         db = await connect();
-        await db.beginTransaction(); // Iniciar transacción
+        await db.beginTransaction(); 
 
-        // Obtener saldo del remitente
+        
         const [remitente] = await db.execute(
             'SELECT id, saldo FROM users WHERE email = ?',
             [remitente_email]
@@ -27,25 +27,25 @@ router.post('/transferencias', authVerify, async (req, res) => {
             });
         }
 
-        // Actualizar saldo del remitente
+        
         await db.execute(
             'UPDATE users SET saldo = saldo - ? WHERE email = ?',
             [monto, remitente_email]
         );
 
-        // Actualizar saldo del destinatario
+        
         await db.execute(
             'UPDATE users SET saldo = saldo + ? WHERE id = ?',
             [monto, destinatario_id]
         );
 
-        // Registrar la transferencia
+        
         await db.execute(
             'INSERT INTO transferencias (remitente_id, destinatario_id, monto) VALUES (?, ?, ?)',
             [remitente[0].id, destinatario_id, monto]
         );
 
-        await db.commit(); // Confirmar transacción
+        await db.commit(); 
         res.json({ status: 200, message: 'Transferencia exitosa' });
 
     } catch (err) {
@@ -73,7 +73,6 @@ router.get('/api/generate-qr', authVerify, async (req, res) => {
     }
 });
 
-// En el backend (transferencias.js)
 router.post('/transferencias/generate-qr', authVerify, async (req, res) => {
     try {
         const { monto, descripcion, userId } = req.body;
