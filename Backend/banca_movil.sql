@@ -19,24 +19,27 @@ CREATE TABLE TokensActivos (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE movimientos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    tipo_movimiento ENUM('DEPOSITO', 'RETIRO', 'TRANSFERENCIA') NOT NULL,
-    cantidad DECIMAL(10, 2) NOT NULL,
-    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES users(id) ON DELETE CASCADE
+
+
+-- Tabla de usuarios
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    password VARCHAR(255),
+    saldo DECIMAL(10,2) DEFAULT 0.00
 );
 
+
 CREATE TABLE transferencias (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    remitente_id INT NOT NULL,
-    destinatario_id INT NOT NULL,
-    monto DECIMAL(10, 2) NOT NULL,
-    descripcion VARCHAR(255),
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT,
+    monto DECIMAL(10,2),
+    tipo ENUM('RETIRO', 'DEPOSITO'),
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (remitente_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (destinatario_id) REFERENCES users(id) ON DELETE CASCADE
+    codigo_qr VARCHAR(255),
+    estado ENUM('PENDIENTE', 'COMPLETADO', 'CANCELADO') DEFAULT 'PENDIENTE',
+    FOREIGN KEY (usuario_id) REFERENCES users(id)
 );
 
 select * from tokensactivos;
@@ -44,7 +47,7 @@ select * from users;
 select * from transferencias;
 select * from movimientos;
 
-
+drop table transferencias;
 
 
 
